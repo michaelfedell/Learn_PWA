@@ -177,5 +177,6 @@
     });
   };
 
+
   app.updateForecastCard(injectedForecast);
 })();
