@@ -3,6 +3,11 @@
 
   var weatherAPIUrlBase = 'https://publicdata-weather.firebaseio.com/';
 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => console.log('Service worker registered', registration))
+  }
+
   var injectedForecast = {
     key: 'newyork',
     label: 'New York, NY',
