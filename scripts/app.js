@@ -160,6 +160,21 @@
   app.getForecast = function (key, label) {
     var url = weatherAPIUrlBase + key + '.json';
     // Make the XHR to get the data, then update the card
+    if ('caches' in window) {
+      caches.match(url).then(response => {
+        if (response) {
+          response.json().then(json => {
+            if (app.hasRequestPending) {
+              console.log('Updating from cache');
+              json.key = key;
+              json.label = label;
+              app.updateForecastCard(json);
+            }});
+        }
+      });
+    }
+
+    app.hasRequestPending = true;
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
       if (request.readyState === XMLHttpRequest.DONE) {
@@ -167,6 +182,7 @@
           var response = JSON.parse(request.response);
           response.key = key;
           response.label = label;
+          app.hasRequestPending = false;
           app.updateForecastCard(response);
         }
       }
