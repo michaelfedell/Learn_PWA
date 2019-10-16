@@ -68,6 +68,7 @@
     var label = selected.textContent;
     app.getForecast(key, label);
     app.selectedCities.push({key: key, label: label});
+    app.saveSelectedCities();
     app.toggleAddDialog(false);
   });
 
@@ -177,6 +178,24 @@
     });
   };
 
+  app.saveSelectedCities = function () {
+    window.localforage.setItem('selectedCities', app.selectedCities);
+  };
 
-  app.updateForecastCard(injectedForecast);
+  document.addEventListener('DOMContentLoaded', function () {
+    window.localforage.getItem('selectedCities', (err, cityList) => {
+      if (cityList) {
+        console.log(cityList);
+        app.selectedCities = cityList;
+        for (let city of app.selectedCities)
+          app.getForecast(city.key, city.label);
+      } else {
+        app.updateForecastCard(injectedForecast);
+        app.selectedCities = [{key: injectedForecast.key, label: injectedForecast.label}];
+        app.saveSelectedCities();
+      }
+    })
+  });
+
+
 })();
