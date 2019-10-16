@@ -1,11 +1,13 @@
 let cacheName = 'weatherPWA';
 let dataCacheName = 'weatherData';
-let dataUrl = 'data';
+let dataUrl = 'https://publicdata-weather.firebaseio.com/';
 
 let filesToCache = [
   '/',
   '/index.html',
+  '/favicon.ico',
   '/scripts/app.js',
+  '/scripts/localForage/dist/localforage.js',
   '/styles/ud811.css',
   '/images/clear.png',
   '/images/cloudy-scattered-showers.png',
@@ -33,7 +35,7 @@ self.addEventListener('activate', e => {
   console.log('[Service Worker] Activating');
   e.waitUntil(
     caches.keys().then(keyList => Promise.all(keyList.map(key => {
-      if (key !== cacheName)
+      if (key !== cacheName && key !== dataCacheName)
         return caches.delete(key);
     })))
   );
@@ -42,6 +44,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
     console.log('[Service Worker] Fetch', e.request.url);
     if (e.request.url.startsWith(dataUrl)) {
+      console.log('Fetching Data');
       e.respondWith(
         fetch(e.request)
           .then(response => caches.open(dataCacheName)
@@ -50,7 +53,7 @@ self.addEventListener('fetch', e => {
               console.log('[Service Worker] Fetched & Cached Data');
               return response;
             })
-          )
+          ).catch(e => console.error('Error when fetching...'))
       );
     } else {
       e.respondWith(
