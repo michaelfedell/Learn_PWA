@@ -1,4 +1,7 @@
 let cacheName = 'weatherPWA';
+let dataCacheName = 'weatherData';
+let dataUrl = 'data';
+
 let filesToCache = [
   '/',
   '/index.html',
@@ -38,8 +41,21 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
     console.log('[Service Worker] Fetch', e.request.url);
-    e.respondWith(
-      caches.match(e.request).then(response => response || fetch(e.request))
-    )
+    if (e.request.url.startsWith(dataUrl)) {
+      e.respondWith(
+        fetch(e.request)
+          .then(response => caches.open(dataCacheName)
+            .then(cache => {
+              cache.put(e.request.url, response.clone());
+              console.log('[Service Worker] Fetched & Cached Data');
+              return response;
+            })
+          )
+      );
+    } else {
+      e.respondWith(
+        caches.match(e.request).then(response => response || fetch(e.request))
+      )
+    }
   }
 );
